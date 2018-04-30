@@ -26,6 +26,7 @@ class MinningView(APIView):
 
         # We must receive a reward for finding the proof.
         # The sender is "0" to signify that this node has mined a new coin
+        print(node_identifier)
         blockchain.new_transaction({
             'sender': "0", 
             'recipient': node_identifier,
@@ -73,6 +74,9 @@ class FullChainView(APIView):
     Shows the complete Blockchain.
     """
     def get(self, request, format=None):
+
+        print(blockchain.chain)
+
         response = { 
             'chain' : blockchain.chain, 
             'length': len(blockchain.chain)
