@@ -2,23 +2,27 @@ import hashlib
 import json
 import requests
 
+from tinydb import TinyDB
 from urllib.parse import urlparse
 from time import time
 
 class Blockchain:
 
     def __init__(self):
-        self.chain = []
+        self.__db = TinyDB('db.json')
+        self.__chain = self.__db.table('chain')
+
+        self.chain = [block for block in self.__chain]
         self.current_transactions = []
         self.nodes = set()
 
         #Creates the genesis block
-        self.new_block(previous_hash=1, proof=100)
+        if len(self.chain) == 0: 
+            self.new_block(previous_hash=1, proof=100)
 
     def new_block(self, previous_hash, proof):
         """
         Create a new Block in Blockchain
-
         :param proof: <int> The proof given by the Proof of Work algorithm
         :param previous_hash: (Optional) <str> Hash of previous Block
         :return: <dict> New Block
@@ -34,7 +38,10 @@ class Blockchain:
 
         #Reset the current list of transactions
         self.current_transactions = []
-        self.chain.append(block)
+
+        self.__chain.insert(block)
+
+        self.chain = [block for block in self.__chain]
 
         return block
 

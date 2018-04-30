@@ -14,6 +14,8 @@ node_identifier = str(uuid4()).replace('-','')
 #Instantiate the Blockchain
 blockchain = Blockchain()
 
+#Instantiate the Blockchain Database
+
 class MinningView(APIView):
     """
     Mines a new block in the blockchain.
@@ -26,7 +28,7 @@ class MinningView(APIView):
 
         # We must receive a reward for finding the proof.
         # The sender is "0" to signify that this node has mined a new coin
-        
+
         blockchain.new_transaction({
             'sender': "0", 
             'recipient': node_identifier,
@@ -51,7 +53,7 @@ class Transaction(APIView):
     """
     Make a transaction in the blockchain.
     """
-    def post(self, resquest, format=None):
+    def post(self, request, format=None):
         values = JSONParser().parse(request)    
 
         transaction = TransactionSerializer(data=values)
@@ -60,7 +62,7 @@ class Transaction(APIView):
             #Create a new Transaction
             index = blockchain.new_transaction(transaction.data)
             response = {
-                'message': 'Transaction will be added to Block {}'.format(index)
+                'message': 'Transaction will be added to Block {}: the next mined.'.format(index)
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
@@ -75,7 +77,7 @@ class FullChainView(APIView):
     """
     def get(self, request, format=None):
 
-        print(blockchain.chain)
+        #print(blockchain.chain)
 
         response = { 
             'chain' : blockchain.chain, 
