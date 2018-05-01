@@ -9,7 +9,7 @@ from time import time
 class Blockchain:
 
     def __init__(self):
-        self.__db = TinyDB('db.json')
+        self.__db = TinyDB('blocks.json')
         self.__chain = self.__db.table('chain')
 
         self.chain = [block for block in self.__chain]
@@ -40,8 +40,9 @@ class Blockchain:
         self.current_transactions = []
 
         self.__chain.insert(block)
-
-        self.chain = [block for block in self.__chain]
+        
+        #self.chain = [block for block in self.__chain]
+        self.chain.append(block)
 
         return block
 
