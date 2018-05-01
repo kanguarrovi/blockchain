@@ -3,9 +3,8 @@ from uuid import uuid4
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import JSONParser
 
-from simpleblockchain.serializers import TransactionSerializer
+from simpleblockchain.serializers import TransactionSerializer, NodesSerializer
 from simpleblockchain.blockchain import Blockchain
 
 # Generate a globally unique address for this node
@@ -13,8 +12,6 @@ node_identifier = str(uuid4()).replace('-','')
 
 #Instantiate the Blockchain
 blockchain = Blockchain()
-
-#Instantiate the Blockchain Database
 
 class MinningView(APIView):
     """
@@ -49,15 +46,17 @@ class MinningView(APIView):
 
         return Response(response, status=status.HTTP_201_CREATED)
 
-class Transaction(APIView):
+
+class TransactionView(APIView):
     """
     Make a transaction in the blockchain.
     """
+    serializer_class = TransactionSerializer
+
     def post(self, request, format=None):
-        values = JSONParser().parse(request)    
 
-        transaction = TransactionSerializer(data=values)
-
+        transaction = TransactionSerializer(data=request.data)
+        
         if transaction.is_valid():
             #Create a new Transaction
             index = blockchain.new_transaction(transaction.data)
@@ -76,9 +75,6 @@ class FullChainView(APIView):
     Shows the complete Blockchain.
     """
     def get(self, request, format=None):
-
-        #print(blockchain.chain)
-
         response = { 
             'chain' : blockchain.chain, 
             'length': len(blockchain.chain)
@@ -89,25 +85,27 @@ class RegisterNodesView(APIView):
     """
     Registers each node with a connection in Blockchain.
     """
+
+    serializer_class = NodesSerializer
+
     def post(self, request, format=None):
-        values = JSONParser().parse(request)
 
-        nodes = values.get('nodes')
-        if nodes is None:
+        values = NodesSerializer(data=request.data)
+
+        if values.is_valid():
+            blockchain.register_node(values.data["node"])
+
             response = {
-                'message': 'Error: Please supply a valid list of nodes'
+                'message': 'New node have been added',
+                'total_nodes': list(blockchain.nodes),
             }
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
-        for node in nodes:
-            blockchain.register_node(node)
-
+            return Response(response, status=status.HTTP_201_CREATED)
+        
         response = {
-            'message': 'New nodes have been added',
-            'total_nodes': list(blockchain.nodes),
+            'message': 'Error: Please supply a valid IP of node'
         }
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(response, status=status.HTTP_201_CREATED)
 
 class ConsensusView(APIView):
     """

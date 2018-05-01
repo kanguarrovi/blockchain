@@ -3,12 +3,12 @@ import json
 import requests
 
 from tinydb import TinyDB
-from urllib.parse import urlparse
 from time import time
 
 class Blockchain:
 
     def __init__(self):
+        #Instantiate the Blockchain Database
         self.__db = TinyDB('blocks.json')
         self.__chain = self.__db.table('chain')
 
@@ -110,13 +110,11 @@ class Blockchain:
 
     def register_node(self, address):
         """
-        Add a new node to the list of nodes
-        :param address: <str> Address of node. Eg. 'http://192.168.0.5:5000'
+        Add a new IP node to the list of nodes
+        :param address: <str> Address and port of node. Eg. '192.168.0.5:5000'
         :return: None
         """
-
-        parsed_url = urlparse(address)
-        self.nodes.add(parsed_url.netloc)
+        self.nodes.add(address)
 
 
     def valid_chain(self, chain):
