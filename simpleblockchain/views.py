@@ -1,3 +1,4 @@
+import re
 from uuid import uuid4
 
 from rest_framework import status
@@ -46,7 +47,6 @@ class MinningView(APIView):
 
         return Response(response, status=status.HTTP_201_CREATED)
 
-
 class TransactionView(APIView):
     """
     Make a transaction in the blockchain.
@@ -93,7 +93,18 @@ class RegisterNodesView(APIView):
         values = NodesSerializer(data=request.data)
 
         if values.is_valid():
-            blockchain.register_node(values.data["node"])
+
+            def return_ip_nodes(ips_string):
+                """
+                Separates every IP node string
+                :param ips_string: <str> String of the node or nodes to add
+                :return: <list> List of each node strings
+                """
+                pattern = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\:\d{1,5})?")
+                ips = pattern.findall(ips_string)
+                return ips
+
+            blockchain.register_node(return_ip_nodes(values.data["node"]))
 
             response = {
                 'message': 'New node have been added',
@@ -105,7 +116,6 @@ class RegisterNodesView(APIView):
             'message': 'Error: Please supply a valid IP of node'
         }
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
 
 class ConsensusView(APIView):
     """

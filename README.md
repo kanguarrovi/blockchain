@@ -31,3 +31,7 @@ Install requirements
 	$ python manage.py runserver
 
     Go to the browser at 127.0.0.1:8000/chain and begin to use it.
+
+## More info.
+
+	127.0.0.1:8000/schema

@@ -114,7 +114,8 @@ class Blockchain:
         :param address: <str> Address and port of node. Eg. '192.168.0.5:5000'
         :return: None
         """
-        self.nodes.add(address)
+        #self.nodes.add(address)
+        self.nodes |= set(address)
 
 
     def valid_chain(self, chain):
@@ -129,9 +130,11 @@ class Blockchain:
 
         while current_index < len(chain):
             block = chain[current_index]
-            print('{}'.format(last_block))
-            print('{}'.format(block))
-            print("\n-----------\n")
+
+            #print('{}'.format(last_block))
+            #print('{}'.format(block))
+            #print("\n-----------\n")
+            
             # Check that the hash of the block is correct
             if block['previous_hash'] != self.hash(last_block):
                 return False
@@ -160,6 +163,7 @@ class Blockchain:
 
         # Grab and verify the chains from all the nodes in our network
         for node in neighbours:
+
             response = requests.get('http://{}/chain'.format(node))
 
             if response.status_code == 200:
@@ -167,13 +171,22 @@ class Blockchain:
                 chain = response.json()['chain']
 
                 # Check if the length is longer and the chain is valid
-                if length > max_length and self.valid_chain(chain):
+                if length > max_length: #and self.valid_chain(chain)
                     max_length = length
                     new_chain = chain
 
+        print(new_chain)
+
         # Replace our chain if we discovered a new, valid chain longer than ours
         if new_chain:
+            self.__db.purge_table('chain')
+            self.__chain = self.__db.table('chain')
+
             self.chain = new_chain
+
+            for block in self.chain:
+                self.__chain.insert(block)
+
             return True
 
         return False
