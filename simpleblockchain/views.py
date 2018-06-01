@@ -1,6 +1,8 @@
 import re
 from uuid import uuid4
 
+from collections import OrderedDict
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -37,13 +39,12 @@ class MinningView(APIView):
         previous_hash = blockchain.hash(last_block)
         block = blockchain.new_block(proof, previous_hash)
 
-        response = {
-            'message' : "New Block Forged",
-            'index' : block['index'],
-            'transactions' : block['transactions'],
-            'proof': block['proof'],
-            'previous_hash': block['previous_hash'],
-        }
+        response = OrderedDict()
+        response['message'] = "New Block Forged"
+        response['index'] = block['index']
+        response['transactions'] = block['transactions']
+        response['proof'] = block['proof']
+        response['previous_hash'] = block['previous_hash']
 
         return Response(response, status=status.HTTP_201_CREATED)
 
@@ -137,6 +138,3 @@ class ConsensusView(APIView):
             }
 
         return Response(response)
-
-
-

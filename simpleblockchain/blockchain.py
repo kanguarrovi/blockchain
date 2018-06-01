@@ -1,7 +1,7 @@
 import hashlib
 import json
 import requests
-
+from collections import OrderedDict 
 from tinydb import TinyDB
 from time import time
 
@@ -18,7 +18,7 @@ class Blockchain:
 
         #Creates the genesis block
         if len(self.chain) == 0: 
-            self.new_block(previous_hash=1, proof=100)
+            self.new_block(1, 100)
 
     def new_block(self, previous_hash, proof):
         """
@@ -28,20 +28,18 @@ class Blockchain:
         :return: <dict> New Block
         """
 
-        block = {
-            'index' : len(self.chain) + 1,
-            'timestamp': time(),
-            'transactions': self.current_transactions,
-            'proof':proof,
-            'previous_hash':previous_hash or self.hash(self.chain[-1])
-        }
+        block = OrderedDict()
+        block['index'] = len(self.chain) + 1
+        block['timestamp'] = time()
+        block['transactions'] = self.current_transactions
+        block['proof'] = proof
+        block['previous_hash'] = previous_hash or self.hash(self.chain[-1])
 
         #Reset the current list of transactions
         self.current_transactions = []
 
         self.__chain.insert(block)
         
-        #self.chain = [block for block in self.__chain]
         self.chain.append(block)
 
         return block
@@ -114,7 +112,7 @@ class Blockchain:
         :param address: <str> Address and port of node. Eg. '192.168.0.5:5000'
         :return: None
         """
-        #self.nodes.add(address)
+
         self.nodes |= set(address)
 
 
@@ -131,9 +129,9 @@ class Blockchain:
         while current_index < len(chain):
             block = chain[current_index]
 
-            #print('{}'.format(last_block))
-            #print('{}'.format(block))
-            #print("\n-----------\n")
+            print('{}'.format(last_block))
+            print('{}'.format(block))
+            print("\n-----------\n")
             
             # Check that the hash of the block is correct
             if block['previous_hash'] != self.hash(last_block):
@@ -167,11 +165,11 @@ class Blockchain:
             response = requests.get('http://{}/chain'.format(node))
 
             if response.status_code == 200:
-                length = response.json()['length']
                 chain = response.json()['chain']
+                length = response.json()['length']
 
                 # Check if the length is longer and the chain is valid
-                if length > max_length: #and self.valid_chain(chain)
+                if length > max_length and self.valid_chain(chain):
                     max_length = length
                     new_chain = chain
 
