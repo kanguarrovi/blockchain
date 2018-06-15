@@ -12,6 +12,5 @@ MarkupSafe==1.0
 pkg-resources==0.0.0
 pytz==2018.4
 requests==2.18.4
-tinydb==3.9.0
 uritemplate==3.0.0
 urllib3==1.22

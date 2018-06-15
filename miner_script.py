@@ -4,7 +4,7 @@ import sys
 def repetition_mine(port, cant):
 	"""
     Calls the mine API a certian cuantity of times.
-    :param port: <string> The port where the API is running. 
+    :param port: <string> The port where the API is running at local host. 
 	:param cant: <int> The cuantity of times the API will be run.
     """
 	for x in range(0, cant):

@@ -2,17 +2,12 @@ import hashlib
 import json
 import requests
 from collections import OrderedDict 
-from tinydb import TinyDB
 from time import time
 
 class Blockchain:
 
     def __init__(self):
-        #Instantiate the Blockchain Database
-        self.__db = TinyDB('blocks.json')
-        self.__chain = self.__db.table('chain')
-
-        self.chain = [block for block in self.__chain]
+        self.chain = []
         self.current_transactions = []
         self.nodes = set()
 
@@ -36,16 +31,11 @@ class Blockchain:
         block['previous_hash'] = previous_hash or self.hash(self.chain[-1])
 
         #Reset the current list of transactions
-        self.current_transactions = []
-
-        self.__chain.insert(block)
-        
+        self.current_transactions = []        
         self.chain.append(block)
-
         return block
 
     def new_transaction(self, transaction):
-        #sender, recipient, amount
         """
         Creates a new transaction to go into the next mined Block
         :param transaction: <dict> Address of the sender, Address of the Recipient, Amount
@@ -173,18 +163,9 @@ class Blockchain:
                     max_length = length
                     new_chain = chain
 
-        print(new_chain)
-
         # Replace our chain if we discovered a new, valid chain longer than ours
         if new_chain:
-            self.__db.purge_table('chain')
-            self.__chain = self.__db.table('chain')
-
             self.chain = new_chain
-
-            for block in self.chain:
-                self.__chain.insert(block)
-
             return True
 
         return False
