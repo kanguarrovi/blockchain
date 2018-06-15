@@ -1,4 +1,7 @@
+import re
 from uuid import uuid4
+
+from collections import OrderedDict
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -36,16 +39,14 @@ class MinningView(APIView):
         previous_hash = blockchain.hash(last_block)
         block = blockchain.new_block(proof, previous_hash)
 
-        response = {
-            'message' : "New Block Forged",
-            'index' : block['index'],
-            'transactions' : block['transactions'],
-            'proof': block['proof'],
-            'previous_hash': block['previous_hash'],
-        }
+        response = OrderedDict()
+        response['message'] = "New Block Forged"
+        response['index'] = block['index']
+        response['transactions'] = block['transactions']
+        response['proof'] = block['proof']
+        response['previous_hash'] = block['previous_hash']
 
         return Response(response, status=status.HTTP_201_CREATED)
-
 
 class TransactionView(APIView):
     """
@@ -93,7 +94,18 @@ class RegisterNodesView(APIView):
         values = NodesSerializer(data=request.data)
 
         if values.is_valid():
-            blockchain.register_node(values.data["node"])
+
+            def return_ip_nodes(ips_string):
+                """
+                Separates every IP node string
+                :param ips_string: <str> String of the node or nodes to add
+                :return: <list> List of each node strings
+                """
+                pattern = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\:\d{1,5})?")
+                ips = pattern.findall(ips_string)
+                return ips
+
+            blockchain.register_node(return_ip_nodes(values.data["node"]))
 
             response = {
                 'message': 'New node have been added',
@@ -105,7 +117,6 @@ class RegisterNodesView(APIView):
             'message': 'Error: Please supply a valid IP of node'
         }
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
 
 class ConsensusView(APIView):
     """
@@ -127,6 +138,3 @@ class ConsensusView(APIView):
             }
 
         return Response(response)
-
-
-
