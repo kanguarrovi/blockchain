@@ -1,7 +1,6 @@
 import hashlib
 import json
 import requests
-from collections import OrderedDict 
 from time import time
 
 class Blockchain:
@@ -23,12 +22,13 @@ class Blockchain:
         :return: <dict> New Block
         """
 
-        block = OrderedDict()
-        block['index'] = len(self.chain) + 1
-        block['timestamp'] = time()
-        block['transactions'] = self.current_transactions
-        block['proof'] = proof
-        block['previous_hash'] = previous_hash or self.hash(self.chain[-1])
+        block = {
+            'index': len(self.chain) + 1,
+            'timestamp': time(),
+            'transactions': self.current_transactions,
+            'proof': proof,
+            'previous_hash': previous_hash or self.hash(self.chain[-1]),
+        }
 
         #Reset the current list of transactions
         self.current_transactions = []        
